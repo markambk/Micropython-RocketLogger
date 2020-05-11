@@ -13,10 +13,13 @@ from machine import I2C, UART, SPI, Pin
 from math import log
 from fusion import Fusion
 from pyb import Switch
+from orientate import orientate
 
 #from micropyGPS import MicropyGPS
 global offsetMag, scaleMag, sw
 sw = Switch()
+SF_DEG_S = 1
+i2c_gy91=I2C(sda= pin.PB7, scl=pin.PB6)
 
 try:
     from cal import *
@@ -26,9 +29,7 @@ except:
     print("No es disposa de dades de calibracio, executa calMPU()")
     MPUCalibrat = False
     
-    
-    
-i2c_gy91=I2C(sda= pin.PB7, scl=pin.PB6)
+
 start = pyb.millis()
 def borrarlog():
     os.remove('/sd/log.csv')
@@ -42,8 +43,8 @@ def mesurar(vegades,step):
         senMPU()
         datalog()
         time.sleep_ms(step)
-def veuredades(step):
-    print('temps (s), pressio (Pa), altitud (m), acX, acY, acZ, gX, gY, gZ, mX, mY, mZ\n')
+def debug(step):
+    print('temps (s)\n')
     while True:
         senBMP()
         senMPU()
@@ -51,7 +52,7 @@ def veuredades(step):
         t = pyb.elapsed_millis(start)/1000
         #print('{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(t,p,altitud,acX,acY,acZ,gX,gY,gZ,mX,mY,mZ))
         
-        print('{},  {},  {}, {}, {}\n'.format(t,altitud,mX,mY,mZ))
+        print('{},  {},  {}\n'.format(t,altitud,mag))
         time.sleep_ms(step)
 
 #Data logger
@@ -72,26 +73,26 @@ def senBMP():
 def senMPU():
     global accel,acX,acY,acZ, gyro,gX,gY,gZ, mag,mX,mY,mZ
     
-    
     bypass = MPU9250(i2c_gy91)
     if MPUCalibrat:
         ak8963 = AK8963(i2c_gy91, offset=offsetMag, scale=scaleMag)
         #Pendent d'actualització de la llibreria a la versio 4.0
-        #mpu6500 = MPU6500(i2c_gy91, offset=offsetGyro) 
-        mpu6500 = MPU6500(i2c_gy91)
+        #mpu6500 = MPU6500(i2c_gy91, offset=offsetGyro, gyro_sf=SF_DEG_S) 
+        mpu6500 = MPU6500(i2c_gy91, gyro_sf=SF_DEG_S)
     else:
         ak8963 = AK8963(i2c_gy91)
-        mpu6500 = MPU6500(i2c_gy91)
+        mpu6500 = MPU6500(i2c_gy91, gyro_sf=SF_DEG_S)
     mpu = mpu9250.MPU9250(i2c_gy91, ak8963=ak8963, mpu6500=mpu6500)
     
-    accel = mpu.acceleration
-    acX,acY,acZ = mpu.acceleration
-    
-    gyro = mpu.gyro
-    gX,gY,gZ = mpu.gyro
+    #Reorientacio dels eixos del accelerometre i el giroscopi per a que tinguin la mateixa disposicio que el magnetometre
+    #Veure eixos al datasheet MPU9250
+    accel, gyro = orientate((1,0,2), (False,False,True), mpu.acceleration, mpu.gyro)
+    acX,acY,acZ = accel
+    gX,gY,gZ = gyro
     
     mag = mpu.magnetic
-    mX,mY,mZ = mpu.magnetic
+    mX,mY,mZ = mag
+    
     
 
 #Calibracio MPU9250
@@ -129,7 +130,7 @@ def Fuse():
         return mag
     
     if Calibrate:
-        print("Calibrating. Press switch when done.")
+        print("Calibrant. Presionar KEY un cop acabat.")
         fuse.calibrate(getmag, sw, lambda : pyb.delay(100))
         print(fuse.magbias)
     
@@ -151,5 +152,5 @@ def Fuse():
         fuse.update(accel, gyro, mag, 0.005) # Note blocking mag read
         if count % 50 == 0:
             print("Heading, Pitch, Roll: {:7.3f} {:7.3f} {:7.3f}".format(fuse.heading, fuse.pitch, fuse.roll))
-        time.sleep_ms(20)
+        time.sleep_ms(10)
         count += 1
