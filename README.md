@@ -6,6 +6,7 @@ WeAct STM32F411 with Micropython Port and Winbond W25Q128 memory.
   - How to Flash: https://github.com/WeActTC/WeAct_F411CE-MicroPython
   - Pinout: https://github.com/WeActTC/MiniF4-STM32F4x1
   - Useful info: https://github.com/mcauser/WEACT_F411CEU6
+  - Example Code + Block Diagram: https://www.weact-tc.cn/2020/01/01/micropython/ 
 
 GY-91 10DOF IMU (From Aliexpress) (BMP280 + MPU9250) connected on I2C
 
