@@ -1,5 +1,5 @@
 # RocketLogger
-A simple program that uses libraries to get useful info from a model rocket, (AoA, altitude, coordinates, acceleration, speed). It also detects Apoapsis (Ap) and deploys a piston system parachute.
+A simple micropython program that uses libraries to get useful info from a model rocket, (AoA, altitude, coordinates, acceleration, speed). It also detects Apoapsis (Ap) and deploys a piston system parachute.
 
 HARDWARE USED:
 
