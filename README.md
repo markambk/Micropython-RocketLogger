@@ -2,6 +2,7 @@
 A simple program that uses libraries to get useful info from a model rocket, (AoA, altitude, coordinates, acceleration, speed). It also detects Apoapsis (Ap) and deploys a piston system parachute.
 
 HARDWARE USED:
+
 WeAct STM32F411 with Micropython Port and Winbond W25Q128 memory.
   - How to Flash: https://github.com/WeActTC/WeAct_F411CE-MicroPython
   - Pinout: https://github.com/WeActTC/MiniF4-STM32F4x1
