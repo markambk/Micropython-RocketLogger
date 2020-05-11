@@ -17,7 +17,7 @@ GY-GPS6MV2 [CONNECT AT 3v3! NOT 5V!] ( Ublox NEO-6M)
 3DR 915Mhz 100mW UART antenna.
 
 LIBRARIES USED:
-micropython-MPU9250: https://github.com/tuupola/micropython-mpu9250
-ImuMag-Fusion: https://github.com/wystephen/ImuMag-fusion
-micropython-bmp280: https://github.com/dafvid/micropython-bmp280
-micropyGPS: https://github.com/inmcm/micropyGPS
+  - micropython-MPU9250: https://github.com/tuupola/micropython-mpu9250
+  - ImuMag-Fusion: https://github.com/wystephen/ImuMag-fusion
+  - micropython-bmp280: https://github.com/dafvid/micropython-bmp280
+  - micropyGPS: https://github.com/inmcm/micropyGPS
