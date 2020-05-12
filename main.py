@@ -14,12 +14,16 @@ from math import log
 from fusion import Fusion
 from pyb import Switch
 from orientate import orientate
+from micropyGPS import MicropyGPS
 
 #from micropyGPS import MicropyGPS
-global offsetMag, scaleMag, sw
+global offsetMag, scaleMag, sw, my_gps
 sw = Switch()
 SF_DEG_S = 1
+
 i2c_gy91=I2C(sda= pin.PB7, scl=pin.PB6)
+uart_gps = UART(2, baudrate=9600, bits=8, parity=None, stop=1)
+my_gps = MicropyGPS()
 
 try:
     from cal import *
@@ -154,3 +158,17 @@ def Fuse():
             print("Heading, Pitch, Roll: {:7.3f} {:7.3f} {:7.3f}".format(fuse.heading, fuse.pitch, fuse.roll))
         time.sleep_ms(10)
         count += 1
+
+
+def senGPS():
+    for i in range(50):
+        try:
+            line = uart_gps.readline().decode("utf-8")
+            for x in line:
+                my_gps.update(x)
+        except:
+           pass 
+        time.sleep_ms(10)
+        
+
+    
