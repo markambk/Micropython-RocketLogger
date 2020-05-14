@@ -16,6 +16,13 @@ from pyb import Switch
 from orientate import orientate
 from micropyGPS import MicropyGPS
 
+try:
+    from cal import *
+except:
+    MPUCalibrat = False
+else:
+    MPUCalibrat = True
+
 #from micropyGPS import MicropyGPS
 global offsetMag, scaleMag, sw, my_gps
 sw = Switch()
@@ -25,16 +32,88 @@ i2c_gy91=I2C(sda= pin.PB7, scl=pin.PB6)
 uart_gps = UART(2, baudrate=9600, bits=8, parity=None, stop=1)
 my_gps = MicropyGPS()
 
-try:
-    from cal import *
-    print("Dades de calibracio trobades, en cas de malfuncionament recalibrar amb calMPU()")
-    MPUCalibrat = True
-except:
-    print("No es disposa de dades de calibracio, executa calMPU()")
-    MPUCalibrat = False
     
-
+class color:
+    GREEN   = '\033[92m'
+    ORG     = '\033[33m'
+    RED     = '\033[91m'
+    FLICK   = '\033[5m'
+    BOLD    = '\033[1m'
+    END     = '\033[0m'
+    
+class msg:
+    OK  = color.BOLD + color.GREEN + "OK" + color.END + color.END
+    NOK = color.BOLD + color.ORG + "N-OK" + color.END + color.END
+    ERR = color.BOLD + color.FLICK + color.RED +"ERROR CRITIC" + color.END + color.END + color.END
+    
 start = pyb.millis()
+
+def test():
+    print(color.BOLD + "Iniciant test del sistema\n" + color.END)
+    print("Comprovant sd...",end="")
+    if 'sd' in os.listdir('/'):
+        print(msg.OK)
+    else:
+        print(msg.ERR)
+        print(color.RED + "Prem Ctrl+D, si no funciona..." + color.END)
+        print(color.RED + "verifica l'estat de la SD" + color.END)
+    
+    print("Comprovant estat del MPU9250...",end="")
+    if 12 in i2c_gy91.scan():
+        print(msg.OK)
+    else:
+        print(msg.ERR)
+        print(color.RED + "Prem Ctrl+D, si no funciona..." + color.END)
+        print(color.RED + "desconecta i reconecta la placa, sino revisa la tensió d'entrada a placa (5V) i les sortides (5V i 3v3)" + color.END)
+        
+    print("Comprovant estat del BMP280...",end="")
+    if 104 in i2c_gy91.scan():
+        print(msg.OK)
+    else:
+        print(msg.ERR)
+        print(color.RED + "Prem Ctrl+D, si no funciona..." + color.END)
+        print(color.RED + "desconecta i reconecta la placa, sino revisa la tensió d'entrada a placa (5V) i les sortides (5V i 3v3)" + color.END)
+       
+    print("Comprovant calibracio del sensor MPU9250...",end="")   
+    try:
+        print("Offset magnetometre: {}".format(offsetMag))
+        print("Escala magnetometre: {}".format(scaleMag))
+        print("Offset giroscopi: {}".format(offsetGyro))
+    except:
+        print(msg.nok)
+        print(color.ORG + "No es disposa de dades de calibracio, executa calMPU()" + color.END)
+        MPUCalibrat = False
+    else:
+        print(msg.OK)
+        print(color.GREEN + "Dades de calibracio trobades, en cas de malfuncionament recalibrar amb calMPU()" + color.END)
+        MPUCalibrat = True
+        
+    print("Comprovant conexió al sensor GPS...",end="")
+    try:
+        "" in uart_gps.readline()
+    except:
+        print(msg.ERR)
+        print(color.RED + "Revisa la connexió del sensor" + color.END)
+    else:
+        print(msg.OK)
+    
+    print("Comprovant cobertura GPS...",end="")
+    try:
+        senGPS(500)
+    except:
+        print(msg.ERR)
+        print(color.RED + "Ha succeit un error desconegut amb el modul senGPS" + color.END)
+    else:
+        if my_gps.satellite_data_updated() and my_gps.satellites_in_use > 0:
+            print(msg.OK)
+            print(color.GREEN + "Hi ha senyal GPS" + color.END)
+            
+            print("S'han detectat {SATS} satel·lits".format(SATS=my_gps.satellites_in_use))
+            print("Avui hauria de ser {DATE} i la hora actual hauria de ser {TIME}".format(DATE=my_gps.date, TIME=my_gps.timestamp))
+        else:
+            print(msg.NOK)
+            print(color.ORG + "No hi ha cobertura GPS" + color.END)
+            
 def borrarlog():
     os.remove('/sd/log.csv')
     
@@ -160,8 +239,8 @@ def Fuse():
         count += 1
 
 
-def senGPS():
-    for i in range(50):
+def senGPS(times):
+    for i in range(times):
         try:
             line = uart_gps.readline().decode("utf-8")
             for x in line:
