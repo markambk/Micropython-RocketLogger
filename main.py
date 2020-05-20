@@ -87,23 +87,7 @@ def auto():
                 calcVelVert()
                 detectorEtapa()
                 datalog(logname,etapactual,mission_start)
-            
-            
-            
-            
-        
-
-
-
-
-
-
-
-
-
-
-
-
+                
 def test():
     print(color.BOLD + "Iniciant test del sistema\n" + color.END)
     print("Comprovant sd...",end="")
