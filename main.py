@@ -174,7 +174,7 @@ def test():
         
 def mesurar(nom):
     log = open('/sd/log{}.csv'.format(nom), 'w')
-    log.write('temps (s), etapa, latitud, longitud, pressio (Pa), altitud (m), AoA(º), Velocitat(m/s), Velocitat_GPS(m/s), acX(m/s²), acY(m/s²), acZ(m/s²)\n')
+    log.write('temps (ms), etapa, latitud, longitud, pressio (Pa), altitud (m), AoA(º), Velocitat(m/s), Velocitat_GPS(m/s), acX(m/s²), acY(m/s²), acZ(m/s²)\n')
     log.close()
     
 def debug(step):
