@@ -32,6 +32,8 @@ my_gps = MicropyGPS()
 sw = Switch()
 SF_DEG_S = 1
 
+Pin('PB3',Pin.OUT_PP,Pin.PULL_NONE)
+
 
     
 class color:
@@ -322,7 +324,9 @@ def detectorEtapa():
             tempsAp = time.ticks_ms()
             etapactual = "Ap"
     elif etapactual == "Ap":
+        pin.PB3.high()
         if pyb.elapsed_millis(tempsAp) > 1000:
+            pin.PB3.low()
             etapactual = "Descens"
     elif etapactual == "Descens":
         if VelVert <= 0.3: etapactual = "Touchdown"
